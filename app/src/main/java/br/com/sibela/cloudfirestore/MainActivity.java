@@ -12,10 +12,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,6 +47,23 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                if (documentSnapshot.exists()) {
+                    String quote = documentSnapshot.getString(QUOTE_KEY);
+                    String author = documentSnapshot.getString(AUTHOR_KEY);
+                    quoteText.setText("\"" + quote + "\" -- " + author);
+                } else if (e != null) {
+                    Toast.makeText(MainActivity.this, "Got an exception!\n" + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
     @OnClick(R.id.save_button)
     public void save(View view) {
         String quote = quoteInput.getText().toString();
@@ -61,21 +82,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(MainActivity.this, "Falha ao salvar!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-
-    @OnClick(R.id.fetch_button)
-    public void fetch(View view) {
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.exists()) {
-                    String quote = documentSnapshot.getString(QUOTE_KEY);
-                    String author = documentSnapshot.getString(AUTHOR_KEY);
-                    quoteText.setText("\"" + quote + "\" -- " + author);
-                }
             }
         });
     }
