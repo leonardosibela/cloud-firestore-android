@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -60,6 +61,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(MainActivity.this, "Falha ao salvar!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    @OnClick(R.id.fetch_button)
+    public void fetch(View view) {
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    String quote = documentSnapshot.getString(QUOTE_KEY);
+                    String author = documentSnapshot.getString(AUTHOR_KEY);
+                    quoteText.setText("\"" + quote + "\" -- " + author);
+                }
             }
         });
     }
