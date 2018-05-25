@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "956479229955",
+    "firebase_url": "https://cloud-firestore-sibela.firebaseio.com",
+    "project_id": "cloud-firestore-sibela",
+    "storage_bucket": "cloud-firestore-sibela.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956479229955:android:d6ac889ed7c4b9e9",
+        "android_client_info": {
+          "package_name": "br.com.sibela.cloudfirestore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956479229955-a07l71u2h6d3ndageq3v25m4o1gkj6d8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.sibela.cloudfirestore",
+            "certificate_hash": "2c0ba24c572c3eb021314184d23c5414c9f64932"
+          }
+        },
+        {
+          "client_id": "956479229955-hfnsrg18sebklg9pgsmlfesh2r3hfuua.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "956479229955-hfnsrg18sebklg9pgsmlfesh2r3hfuua.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjP5ISImlR66mFtPIi6OizJ8DK5hxJSNI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956479229955-hfnsrg18sebklg9pgsmlfesh2r3hfuua.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
