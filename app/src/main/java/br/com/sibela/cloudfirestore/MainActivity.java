@@ -1,25 +1,29 @@
 package br.com.sibela.cloudfirestore;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String QUOTE_KEY = "quote";
     private static final String AUTHOR_KEY = "author";
-    private DocumentReference docRef = FirebaseFirestore.getInstance().document("sampleData/inpiration");
+    private final DocumentReference docRef;
 
     @BindView(R.id.quote_input)
     EditText quoteInput;
@@ -40,6 +44,11 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.quote_text)
     TextView quoteText;
 
+    public MainActivity() {
+        String uid = FirebaseAuth.getInstance().getUid();
+        docRef = FirebaseFirestore.getInstance().collection("users").document(uid);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,20 +57,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot.exists()) {
-                    String quote = documentSnapshot.getString(QUOTE_KEY);
-                    String author = documentSnapshot.getString(AUTHOR_KEY);
-                    quoteText.setText("\"" + quote + "\" -- " + author);
-                } else if (e != null) {
-                    Toast.makeText(MainActivity.this, "Got an exception!\n" + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                logout();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        FirebaseAuth.getInstance().signOut();
+
+        Intent intent = new Intent(getBaseContext(), LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     @OnClick(R.id.save_button)
@@ -73,9 +90,9 @@ public class MainActivity extends AppCompatActivity {
         dataToSave.put(QUOTE_KEY, quote);
         dataToSave.put(AUTHOR_KEY, authorName);
 
-        docRef.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
+        docRef.collection("quotes").add(dataToSave).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public void onSuccess(Void aVoid) {
+            public void onSuccess(DocumentReference documentReference) {
                 Toast.makeText(MainActivity.this, "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
