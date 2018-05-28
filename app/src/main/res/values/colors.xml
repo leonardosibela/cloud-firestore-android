@@ -6,4 +6,6 @@
 
     <color name="colorPrimaryVeryDark">#FF6F00</color>
     <color name="colorPrimaryIntermediary">#FA9506</color>
+
+    <color name="linkBlue">#4d94ff</color>
 </resources>

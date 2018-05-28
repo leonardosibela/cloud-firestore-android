@@ -17,5 +17,9 @@
     <string name="error_unfilled_fields">You must fill in all the fields</string>
     <string name="error_inform_email">Please enter a valid email address</string>
     <string name="menu_logout">Logout</string>
+    <string name="quote_phrase">Frase</string>
+    <string name="quote_author">Autor</string>
+    <string name="quote_dialog_button_create">CREATE</string>
+    <string name="quote_dialog_button_cancel">CANCEL</string>
 
 </resources>

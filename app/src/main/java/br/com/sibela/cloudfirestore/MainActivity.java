@@ -22,18 +22,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback {
 
     private final DocumentReference userRef;
-
-    @BindView(R.id.quote_input)
-    EditText quoteInput;
-
-    @BindView(R.id.author_name_input)
-    EditText authorName;
-
-    @BindView(R.id.quote_text)
-    TextView quoteText;
 
     public MainActivity() {
         String uid = FirebaseAuth.getInstance().getUid();
@@ -72,13 +63,19 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    @OnClick(R.id.save_button)
+    @OnClick(R.id.add_quote_fab)
     public void save(View view) {
+        QuoteDialog quoteDialog = QuoteDialog.getInstance();
+        quoteDialog.show(getSupportFragmentManager(), QuoteDialog.TAG);
+    }
+
+    @Override
+    public void saveQuote(String author, String phrase) {
         DocumentReference newQuoteRef = userRef.collection("quotes").document();
 
         Quote quote = new Quote();
-        quote.setAuthor(this.authorName.getText().toString());
-        quote.setPhrase(quoteInput.getText().toString());
+        quote.setAuthor(author);
+        quote.setPhrase(phrase);
         quote.setQuoteId(newQuoteRef.getId());
         quote.setUserId(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
