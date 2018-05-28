@@ -52,7 +52,30 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setupRecyclerView();
-        displayQuotes();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        userRef.collection("quotes").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    return;
+                }
+                final List<Quote> quotes = new ArrayList<>();
+                queryDocumentSnapshots.getQuery().get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                            Quote quote = document.toObject(Quote.class);
+                            quotes.add(quote);
+                        }
+                        updateQuotes(quotes);
+                    }
+                });
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -60,26 +83,6 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
         quotesRecycler.setLayoutManager(new LinearLayoutManager(quotesRecycler.getContext()));
         quotesRecycler.addItemDecoration(new SimpleItemDecoration(getBaseContext(),
                 getResources().getConfiguration().orientation));
-    }
-
-    private void displayQuotes() {
-        final List<Quote> quotes = new ArrayList<>();
-
-        userRef.collection("quotes").orderBy("timestamp", Query.Direction.ASCENDING)
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "Falha ao carregar citações!", Toast.LENGTH_SHORT).show();
-                } else {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Quote quote = document.toObject(Quote.class);
-                        quotes.add(quote);
-                    }
-                    updateQuotes(quotes);
-                }
-            }
-        });
     }
 
     private void updateQuotes(List<Quote> quotes) {
