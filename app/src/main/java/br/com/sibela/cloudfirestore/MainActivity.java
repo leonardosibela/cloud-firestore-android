@@ -4,25 +4,40 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import br.com.sibela.cloudfirestore.adapter.QuoteAdapter;
 import br.com.sibela.cloudfirestore.model.Quote;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback {
+
+    @BindView(R.id.quotes_recycler)
+    RecyclerView quotesRecycler;
 
     private final DocumentReference userRef;
 
@@ -36,6 +51,40 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        setupRecyclerView();
+        displayQuotes();
+    }
+
+    private void setupRecyclerView() {
+        quotesRecycler.setHasFixedSize(true);
+        quotesRecycler.setLayoutManager(new LinearLayoutManager(quotesRecycler.getContext()));
+        quotesRecycler.addItemDecoration(new SimpleItemDecoration(getBaseContext(),
+                getResources().getConfiguration().orientation));
+    }
+
+    private void displayQuotes() {
+        final List<Quote> quotes = new ArrayList<>();
+
+        userRef.collection("quotes").orderBy("timestamp", Query.Direction.ASCENDING)
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (!task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Falha ao carregar citações!", Toast.LENGTH_SHORT).show();
+                } else {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Quote quote = document.toObject(Quote.class);
+                        quotes.add(quote);
+                    }
+                    updateQuotes(quotes);
+                }
+            }
+        });
+    }
+
+    private void updateQuotes(List<Quote> quotes) {
+        QuoteAdapter quoteAdapter = new QuoteAdapter(quotes);
+        quotesRecycler.setAdapter(quoteAdapter);
     }
 
     @Override
@@ -51,13 +100,11 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
                 logout();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-
         Intent intent = new Intent(getBaseContext(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
