@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
     @Override
     protected void onStart() {
         super.onStart();
-        userRef.collection("quotes").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        userRef.collection("quotes").addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
