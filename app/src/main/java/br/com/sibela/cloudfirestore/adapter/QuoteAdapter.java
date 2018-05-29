@@ -15,9 +15,11 @@ import br.com.sibela.cloudfirestore.model.Quote;
 public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.QuoteViewHolder> {
 
     private List<Quote> quotes;
+    private Callback callback;
 
-    public QuoteAdapter(List<Quote> quotes) {
+    public QuoteAdapter(List<Quote> quotes, Callback callback) {
         this.quotes = quotes;
+        this.callback = callback;
     }
 
     @NonNull
@@ -29,9 +31,15 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.QuoteViewHol
 
     @Override
     public void onBindViewHolder(@NonNull QuoteViewHolder holder, int position) {
-        Quote quote = quotes.get(position);
+        final Quote quote = quotes.get(position);
         holder.authorText.setText(quote.getAuthor());
         holder.phraseText.setText(quote.getPhrase());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.openQuoteAlterer(quote);
+            }
+        });
     }
 
     @Override
@@ -48,5 +56,9 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.QuoteViewHol
             phraseText = itemView.findViewById(R.id.phrase_text);
             authorText = itemView.findViewById(R.id.author_text);
         }
+    }
+
+    public interface Callback {
+        void openQuoteAlterer(Quote quote);
     }
 }

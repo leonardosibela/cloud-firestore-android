@@ -3,6 +3,7 @@ package br.com.sibela.cloudfirestore;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,11 +16,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -34,16 +35,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback {
+public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback, QuoteEditDialog.Callback, QuoteAdapter.Callback {
 
     @BindView(R.id.quotes_recycler)
     RecyclerView quotesRecycler;
 
-    private final DocumentReference userRef;
+    private final CollectionReference userQuotesRef;
 
     public MainActivity() {
         String uid = FirebaseAuth.getInstance().getUid();
-        userRef = FirebaseFirestore.getInstance().collection("users").document(uid);
+        userQuotesRef = FirebaseFirestore.getInstance().collection("users").document(uid).collection("quotes");
     }
 
     @Override
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
     @Override
     protected void onStart() {
         super.onStart();
-        userRef.collection("quotes").addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+        userQuotesRef.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                 if (e != null) {
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
     }
 
     private void updateQuotes(List<Quote> quotes) {
-        QuoteAdapter quoteAdapter = new QuoteAdapter(quotes);
+        QuoteAdapter quoteAdapter = new QuoteAdapter(quotes, this);
         quotesRecycler.setAdapter(quoteAdapter);
     }
 
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
 
     @Override
     public void saveQuote(String author, String phrase) {
-        DocumentReference newQuoteRef = userRef.collection("quotes").document();
+        DocumentReference newQuoteRef = userQuotesRef.document();
 
         Quote quote = new Quote();
         quote.setAuthor(author);
@@ -136,6 +137,29 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
                     Toast.makeText(MainActivity.this, "Salvo com sucesso!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Falha ao salvar!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void openQuoteAlterer(Quote quote) {
+        QuoteEditDialog dialog = QuoteEditDialog.newInstance(quote);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(dialog, QuoteEditDialog.TAG);
+        ft.commitAllowingStateLoss();
+    }
+
+    @Override
+    public void alterQuotePhrase(Quote quote, String phrase) {
+        DocumentReference quoteRef = userQuotesRef.document(quote.getQuoteId());
+        quoteRef.update("phrase", phrase).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Citação alterada com sucesso!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Erro ao alterar citação!", Toast.LENGTH_SHORT).show();
                 }
             }
         });

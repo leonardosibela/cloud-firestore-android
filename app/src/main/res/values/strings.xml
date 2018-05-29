@@ -21,5 +21,8 @@
     <string name="quote_author">Autor</string>
     <string name="quote_dialog_button_create">CREATE</string>
     <string name="quote_dialog_button_cancel">CANCEL</string>
+    <string name="general_label_ok">Ok</string>
+    <string name="general_label_cancel">Cancelar</string>
+    <string name="quote_edit_title">Editando citação:</string>
 
 </resources>
