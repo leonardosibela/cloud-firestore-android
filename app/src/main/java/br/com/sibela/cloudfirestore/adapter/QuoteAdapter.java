@@ -34,10 +34,19 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.QuoteViewHol
         final Quote quote = quotes.get(position);
         holder.authorText.setText(quote.getAuthor());
         holder.phraseText.setText(quote.getPhrase());
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callback.openQuoteAlterer(quote);
+                callback.askToAlter(quote);
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                callback.askToDelete(quote);
+                return true;
             }
         });
     }
@@ -59,6 +68,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.QuoteViewHol
     }
 
     public interface Callback {
-        void openQuoteAlterer(Quote quote);
+        void askToAlter(Quote quote);
+
+        void askToDelete(Quote quote);
     }
 }

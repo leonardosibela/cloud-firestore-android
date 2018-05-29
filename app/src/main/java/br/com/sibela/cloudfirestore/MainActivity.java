@@ -35,7 +35,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback, QuoteEditDialog.Callback, QuoteAdapter.Callback {
+public class MainActivity extends AppCompatActivity implements QuoteDialog.Callback, QuoteEditDialog.Callback, QuoteDeleteDialog.Callback, QuoteAdapter.Callback {
 
     @BindView(R.id.quotes_recycler)
     RecyclerView quotesRecycler;
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
     }
 
     @Override
-    public void openQuoteAlterer(Quote quote) {
+    public void askToAlter(Quote quote) {
         QuoteEditDialog dialog = QuoteEditDialog.newInstance(quote);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(dialog, QuoteEditDialog.TAG);
@@ -160,6 +160,28 @@ public class MainActivity extends AppCompatActivity implements QuoteDialog.Callb
                     Toast.makeText(MainActivity.this, "Citação alterada com sucesso!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Erro ao alterar citação!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void askToDelete(Quote quote) {
+        QuoteDeleteDialog dialog = QuoteDeleteDialog.newInstance(quote);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(dialog, QuoteDeleteDialog.TAG);
+        ft.commitAllowingStateLoss();
+    }
+
+    @Override
+    public void deleteQuote(Quote quote) {
+        userQuotesRef.document(quote.getQuoteId()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Citação deletada com sucesso!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Erro ao deletar citação!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
